@@ -16,12 +16,7 @@ var data = [
     { 'slotPosition': { 'N': '7' }, 'imageFile': { 'S': 'hart_j.png' } },
     { 'slotPosition': { 'N': '8' }, 'imageFile': { 'S': 'diam_a.png' } },
     { 'slotPosition': { 'N': '9' }, 'imageFile': { 'S': 'diam_k.png' } },
-    { 'slotPosition': { 'N': '10' }, 'imageFile': { 'S': 'diam_q.png' } },
-    { 'slotPosition': { 'N': '11' }, 'imageFile': { 'S': 'diam_j.png' } },
-    { 'slotPosition': { 'N': '12' }, 'imageFile': { 'S': 'club_a.png' } },
-    { 'slotPosition': { 'N': '13' }, 'imageFile': { 'S': 'club_k.png' } },
-    { 'slotPosition': { 'N': '14' }, 'imageFile': { 'S': 'club_q.png' } },
-    { 'slotPosition': { 'N': '15' }, 'imageFile': { 'S': 'club_j.png' } }
+    { 'slotPosition': { 'N': '10' }, 'imageFile': { 'S': 'diam_q.png' } }
 ]
 
 function putItem(element) {
