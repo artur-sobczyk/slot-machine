@@ -5,7 +5,7 @@ Slot machine demo:
    - populate data using: `dynamo_data.js`
    - create policy - `polices/SlotPositionTableReadPolicy.json`
   
-2. Create Lambda `SlotPullLambda`
+2. Create Lambda `SlotPositionLambda`
    - create role for lambda
    - code from: `lambda_slotpulll.js`
    - test :)
