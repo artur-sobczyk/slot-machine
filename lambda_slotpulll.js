@@ -18,8 +18,8 @@ function getRandomSlotPromise() {
         TableName: "SlotPositionTable"
     };
     
-    // Set a random number 0-15 for the slot position
-    thisPullParams.Key.slotPosition.N = Math.floor(Math.random()*15).toString();
+    // Set a random number 0-10 for the slot position
+    thisPullParams.Key.slotPosition.N = Math.floor(Math.random()*10).toString();
     
     // Call DynamoDB to retrieve the image
     return dynamoDbClient.getItem(thisPullParams).promise().then(
