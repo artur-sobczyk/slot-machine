@@ -1,0 +1,111 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: slot machine
+
+Resources:
+
+  SlotPositionTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey: 
+        Name: slotPosition
+        Type: Number
+      TableName: SlotPositionTable1
+
+  SlotPositionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SlotPositionFunction1
+      Handler: app.handler
+      Runtime: nodejs14.x
+      CodeUri: src/
+      Policies:
+        DynamoDBReadPolicy:
+          TableName: !Ref SlotPositionTable
+          
+  LambdaInvocationRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      RoleName: LambdaInvocationRole1
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - cognito-identity.amazonaws.com
+            Action:
+              - 'sts:AssumeRoleWithWebIdentity'
+            Condition:
+              StringEquals: 
+                "cognito-identity.amazonaws.com:aud": !Ref SlotPositionCognitoIdentityPool
+      Policies: 
+        - PolicyName: LambdaInvocationPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 'lambda:InvokeFunction'
+                Resource: !GetAtt SlotPositionFunction.Arn
+    
+    
+  # Cognito identity pool for anoymous access  
+  SlotPositionCognitoIdentityPool:  
+    Type: AWS::Cognito::IdentityPool
+    Properties: 
+      IdentityPoolName: SlotPositionCognitoIdentityPool
+      AllowUnauthenticatedIdentities: true
+
+  
+  IdentityPoolRoleMapping:
+    Type: "AWS::Cognito::IdentityPoolRoleAttachment"
+    Properties:
+      IdentityPoolId: !Ref SlotPositionCognitoIdentityPool
+      Roles:
+        authenticated: !GetAtt LambdaInvocationRole.Arn
+        unauthenticated: !GetAtt LambdaInvocationRole.Arn
+        
+        
+  # bucket for hosting static webside, requires removal of global block public access    
+  SlotPositionS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: slot-position-demo-bucket
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: True
+        BlockPublicPolicy: False
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: False
+      WebsiteConfiguration:
+        ErrorDocument: index.html
+        IndexDocument: index.html
+  
+  SlotPositionS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref SlotPositionS3Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref SlotPositionS3Bucket
+                - /*
+            Principal: '*'
+Outputs:
+
+  CognitioIdentityPoolId:
+    Description: "update static frontend with it"
+    Value: !Ref SlotPositionCognitoIdentityPool
+  
+  BucketNameHosting:
+    Description: "url to access static frontend"
+    Value: !Sub http://${SlotPositionS3Bucket}.s3-website.${AWS::Region}.amazonaws.com
+    
+  CopyFrontendCommand:
+    Description: "copy frontnend here"
+    Value: !Sub aws s3 sync ./static s3://${SlotPositionS3Bucket}
